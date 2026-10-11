@@ -8,6 +8,8 @@ type Props = {
   to: number;
   offer: number;
   minimum: number;
+  /** Surplus that counts as a safe buffer; drawn as a dashed line. */
+  bufferSurplus: number;
   xLabel: string;
   /** Click on the chart picks that pay value. */
   onPick: (x: number) => void;
@@ -17,7 +19,7 @@ type Props = {
 
 const thousands = (n: number) => `${Math.round(n / 1000)}k`;
 
-export function SurplusChart({ surplusAt, from, to, offer, minimum, xLabel, onPick, snap }: Props) {
+export function SurplusChart({ surplusAt, from, to, offer, minimum, bufferSurplus, xLabel, onPick, snap }: Props) {
   const steps = 60;
   const data = Array.from({ length: steps + 1 }, (_, i) => {
     const x = Math.round(from + ((to - from) * i) / steps);
@@ -42,6 +44,7 @@ export function SurplusChart({ surplusAt, from, to, offer, minimum, xLabel, onPi
           />
           <ReferenceLine y={0} stroke="var(--muted)" />
           <ReferenceLine x={minimum} stroke="var(--accent)" strokeDasharray="4 4" />
+          <ReferenceLine y={bufferSurplus} stroke="var(--good)" strokeDasharray="4 4" />
           <Line type="monotone" dataKey="surplus" stroke="var(--accent)" strokeWidth={2} dot={false} isAnimationActive={false} />
           {offer >= from && offer <= to && (
             <ReferenceDot x={offer} y={Math.round(offerSurplus)} r={6}

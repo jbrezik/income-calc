@@ -33,6 +33,34 @@ function Surplus({ value }: { value: number }) {
   );
 }
 
+/** Share of the need kept as a safety buffer. */
+const BUFFER = 0.1;
+
+type TargetsProps = { need: number; even: number; buffer: number; unit: string; offer: number; onPick: (v: number) => void };
+
+/** Pay needed to break even and to keep a 10 % buffer, compared with the current offer. */
+function Targets({ need, even, buffer, unit, offer, onPick }: TargetsProps) {
+  const line = (label: string, value: number, icon: string) => {
+    const diff = value - offer;
+    return (
+      <li className="d-flex flex-wrap align-items-baseline gap-2">
+        <i className={`bi ${icon}`} aria-hidden />
+        <span>{label}: <strong>{kc(value)}</strong> {unit}</span>
+        <span className={diff > 0 ? "text-danger" : "text-success"}>
+          {diff === 0 ? "odpovídá nabídce" : `${signedKc(diff)} oproti nabídce`}
+        </span>
+        <button type="button" className="btn btn-link btn-sm p-0 ms-auto" onClick={() => onPick(value)}>Nastavit</button>
+      </li>
+    );
+  };
+  return (
+    <ul className="list-unstyled small mt-2 mb-0 vstack gap-1">
+      {line("Na vyrovnání", even, "bi-bullseye text-primary")}
+      {line(`S rezervou ${BUFFER * 100} % (+${kc(need * BUFFER)}/měs)`, buffer, "bi-shield-check text-success")}
+    </ul>
+  );
+}
+
 function Minimum({ value, unit, detail }: { value: string; unit: string; detail: string }) {
   return (
     <div className="border-start border-4 border-primary ps-3 mb-3">
@@ -86,7 +114,9 @@ export function HppCard({ need, year, person, offer, onOffer, mdPerYear, osvcOpt
           Stejná čistá jako OSVČ za <strong>{kc(equivMd)}/MD</strong> ({mdPerYear} MD/rok)</p>
         <SurplusChart surplusAt={(g) => hpp(g, year, person).netMonthly - need}
           from={Math.round(minGross * 0.5)} to={Math.round(Math.max(minGross * 1.6, offer * 1.1))}
-          offer={offer} minimum={minGross} xLabel="Hrubá mzda" onPick={onOffer} snap={500} />
+          offer={offer} minimum={minGross} bufferSurplus={need * BUFFER} xLabel="Hrubá mzda" onPick={onOffer} snap={500} />
+        <Targets need={need} even={minGross} buffer={minHppGross(need * (1 + BUFFER), year, person)} unit="hrubého / měs"
+          offer={offer} onPick={onOffer} />
       </div>
     </section>
   );
@@ -152,7 +182,9 @@ export function OsvcCard({ need, year, person, offer, onOffer, mdPerYear, onMdPe
           Stejná čistá jako HPP za <strong>{kc(equivGross)}</strong> hrubého / měs</p>
         <SurplusChart surplusAt={(x) => osvc(x, mdPerYear, year, person, opts).netMonthly - need}
           from={Math.round(minRate * 0.5)} to={Math.round(Math.max(minRate * 1.6, offer * 1.1))}
-          offer={offer} minimum={minRate} xLabel="Sazba za MD" onPick={onOffer} snap={100} />
+          offer={offer} minimum={minRate} bufferSurplus={need * BUFFER} xLabel="Sazba za MD" onPick={onOffer} snap={100} />
+        <Targets need={need} even={minRate} buffer={minMdRate(need * (1 + BUFFER), mdPerYear, year, person, opts)} unit="/ MD"
+          offer={offer} onPick={onOffer} />
       </div>
     </section>
   );

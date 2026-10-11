@@ -30,6 +30,10 @@ body { background: var(--bs-tertiary-bg); }
 .stepper .num-input { flex: 0 0 6.5rem; width: 6.5rem; min-width: 0; }
 .stepper .stepper-btn { padding-inline: 0.5rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
 
+/* Sliders: thin tall line instead of a round thumb */
+.form-range::-webkit-slider-thumb { width: 4px; height: 1.5rem; margin-top: -0.5rem; border-radius: 2px; }
+.form-range::-moz-range-thumb { width: 4px; height: 1.5rem; border-radius: 2px; }
+
 /* Category cards */
 .category-card .card-header { padding: 0.5rem 0.75rem; }
 .category-name { text-transform: uppercase; font-size: 1.1rem; letter-spacing: 0.04em; }
