@@ -15,6 +15,8 @@ body { background: var(--bs-tertiary-bg); }
 /* Phones: scale everything down (16px -> 13px); Bootstrap and our sizes are rem-based. */
 @media (max-width: 575.98px) {
   html { font-size: 13px; }
+  /* Steppers stay two steps above the base so they are easy to tap. */
+  .stepper .btn, .stepper .form-control, .stepper .input-group-text { font-size: 15px; }
 }
 
 .font-monospace-num, .num-input, .table { font-variant-numeric: tabular-nums; }
