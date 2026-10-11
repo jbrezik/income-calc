@@ -72,3 +72,10 @@ export const TAX_YEARS: Record<number, TaxYear> = {
     osvc: { ...osvcShared, socialMinBaseMonthly: 18083, healthMinBaseMonthly: 25831.5, sicknessMonthly: 243 },
   },
 };
+
+/** Rules for `year`, or the nearest year with known rules. */
+export function taxYearFor(year: number): TaxYear {
+  const known = Object.keys(TAX_YEARS).map(Number);
+  const nearest = known.reduce((best, y) => (Math.abs(y - year) < Math.abs(best - year) ? y : best));
+  return TAX_YEARS[nearest];
+}

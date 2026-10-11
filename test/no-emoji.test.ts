@@ -1,5 +1,5 @@
 import { execSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 // Emoji and emoji-rendering symbols are banned in tracked files (see CLAUDE.md).
@@ -9,7 +9,7 @@ const BANNED = /[\u{1F000}-\u{1FAFF}\u{2600}-\u{2604}\u{2607}-\u{27BF}\u{2B00}-\
 describe("no emoji", () => {
   const files = execSync("git ls-files --cached --others --exclude-standard", { encoding: "utf8" })
     .split("\n")
-    .filter((f) => f && !f.endsWith("package-lock.json") && f !== "CLAUDE.md");
+    .filter((f) => f && existsSync(f) && !f.endsWith("package-lock.json") && f !== "CLAUDE.md");
 
   it.each(files)("%s", (file) => {
     const lines = readFileSync(file, "utf8").split("\n");

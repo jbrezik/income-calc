@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 
-/** State persisted to localStorage; falls back to `initial` when storage is unavailable or stale. */
-export function useStoredState<T extends object>(key: string, initial: T) {
+/**
+ * State persisted to localStorage. `parse` validates and migrates the stored value;
+ * when storage is unavailable or the value is unreadable, `initial` is used.
+ */
+export function useStoredState<T>(key: string, initial: T, parse: (raw: unknown) => T) {
   const [value, setValue] = useState<T>(() => {
     try {
       const raw = localStorage.getItem(key);
-      return raw ? { ...initial, ...JSON.parse(raw) } : initial;
+      return raw ? parse(JSON.parse(raw)) : initial;
     } catch {
       return initial;
     }

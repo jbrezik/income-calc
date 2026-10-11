@@ -9,11 +9,15 @@ type Props = {
   offer: number;
   minimum: number;
   xLabel: string;
+  /** Click on the chart picks that pay value. */
+  onPick: (x: number) => void;
+  /** Picked values snap to this step. */
+  snap: number;
 };
 
 const thousands = (n: number) => `${Math.round(n / 1000)}k`;
 
-export function SurplusChart({ surplusAt, from, to, offer, minimum, xLabel }: Props) {
+export function SurplusChart({ surplusAt, from, to, offer, minimum, xLabel, onPick, snap }: Props) {
   const steps = 60;
   const data = Array.from({ length: steps + 1 }, (_, i) => {
     const x = Math.round(from + ((to - from) * i) / steps);
@@ -21,23 +25,27 @@ export function SurplusChart({ surplusAt, from, to, offer, minimum, xLabel }: Pr
   });
   const offerSurplus = surplusAt(offer);
   return (
-    <div className="chart" role="img" aria-label={`Přebytek podle: ${xLabel}`}>
+    <div className="chart" role="img" aria-label={`Přebytek podle: ${xLabel}. Kliknutím nastavíte nabídku.`}>
       <ResponsiveContainer width="100%" height={200}>
-        <LineChart data={data} margin={{ top: 8, right: 12, bottom: 4, left: 4 }}>
+        <LineChart data={data} margin={{ top: 8, right: 12, bottom: 4, left: 4 }}
+          onClick={(e) => {
+            const point = data[Number(e?.activeTooltipIndex)];
+            if (point) onPick(Math.round(point.x / snap) * snap);
+          }}>
           <CartesianGrid stroke="var(--grid)" strokeDasharray="3 3" />
           <XAxis dataKey="x" type="number" domain={[from, to]} tickFormatter={thousands} stroke="var(--muted)" fontSize={12} />
           <YAxis tickFormatter={thousands} stroke="var(--muted)" fontSize={12} width={44} />
           <Tooltip
             formatter={(v) => [signedKc(Number(v)), "Přebytek / měs"]}
-            labelFormatter={(x) => `${xLabel}: ${kc(Number(x))}`}
+            labelFormatter={(x) => `${xLabel}: ${kc(Number(x))} (klikni pro nastavení)`}
             contentStyle={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text)" }}
           />
           <ReferenceLine y={0} stroke="var(--muted)" />
           <ReferenceLine x={minimum} stroke="var(--accent)" strokeDasharray="4 4" />
           <Line type="monotone" dataKey="surplus" stroke="var(--accent)" strokeWidth={2} dot={false} isAnimationActive={false} />
           {offer >= from && offer <= to && (
-            <ReferenceDot x={offer} y={Math.round(offerSurplus)} r={5}
-              fill={offerSurplus >= 0 ? "var(--good)" : "var(--bad)"} stroke="none" />
+            <ReferenceDot x={offer} y={Math.round(offerSurplus)} r={6}
+              fill={offerSurplus >= 0 ? "var(--good)" : "var(--bad)"} stroke="var(--surface)" strokeWidth={2} />
           )}
         </LineChart>
       </ResponsiveContainer>

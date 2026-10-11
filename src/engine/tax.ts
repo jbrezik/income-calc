@@ -80,7 +80,7 @@ export function hpp(grossMonthly: number, year: TaxYear, p: Person): HppResult {
 
 export type OsvcOptions = { sickness: boolean };
 
-export type OsvcResult = {
+export type OsvcRevenueResult = {
   annual: {
     revenue: number;
     expenses: number;
@@ -92,16 +92,21 @@ export type OsvcResult = {
     net: number;
   };
   netMonthly: number;
-  hourly: number;
   aboveHighRate: boolean;
   /** Turnover crosses the VAT registration threshold. */
   vatWarning: boolean;
 };
 
-/** Self-employed (OSVČ, hlavní činnost) with flat-rate expenses (výdajový paušál). */
+export type OsvcResult = OsvcRevenueResult & { hourly: number };
+
+/** Self-employed (OSVČ) from MD rate x billable MD per year. */
 export function osvc(mdRate: number, mdPerYear: number, year: TaxYear, p: Person, opts: OsvcOptions): OsvcResult {
+  return { ...osvcFromRevenue(mdRate * mdPerYear, year, p, opts), hourly: mdRate / MD_HOURS };
+}
+
+/** Self-employed (OSVČ, hlavní činnost) with flat-rate expenses (výdajový paušál), from annual revenue. */
+export function osvcFromRevenue(revenue: number, year: TaxYear, p: Person, opts: OsvcOptions): OsvcRevenueResult {
   const o = year.osvc;
-  const revenue = mdRate * mdPerYear;
   const expenses = Math.min(revenue * o.flatExpenseRate, o.flatExpenseCap);
   const profit = revenue - expenses;
   const socialBase = Math.min(Math.max(profit * o.socialBaseShare, o.socialMinBaseMonthly * 12), year.maxSocialBase);
@@ -113,7 +118,6 @@ export function osvc(mdRate: number, mdPerYear: number, year: TaxYear, p: Person
   return {
     annual: { revenue, expenses, profit, social, health, sickness, tax, net },
     netMonthly: net / 12,
-    hourly: mdRate / MD_HOURS,
     aboveHighRate: profit > year.highRateThreshold,
     vatWarning: revenue > year.vatThreshold,
   };

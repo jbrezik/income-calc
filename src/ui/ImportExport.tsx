@@ -31,10 +31,10 @@ export function ImportExport({ state, onImport }: Props) {
 
   return (
     <>
-      <button className="ghost" onClick={exportJson}>Export JSON</button>
-      <button className="ghost" onClick={() => fileRef.current?.click()}>Import JSON</button>
+      <button type="button" className="btn btn-outline-secondary btn-sm" onClick={exportJson}><i className="bi bi-download me-1" aria-hidden />Export JSON</button>
+      <button type="button" className="btn btn-outline-secondary btn-sm" onClick={() => fileRef.current?.click()}><i className="bi bi-upload me-1" aria-hidden />Import JSON</button>
       <input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={(e) => importJson(e.target.files?.[0])} />
-      {error && <p className="note warn import-error" role="alert">{error}</p>}
+      {error && <p className="small text-danger w-100 text-end mb-0" role="alert">{error}</p>}
     </>
   );
 }

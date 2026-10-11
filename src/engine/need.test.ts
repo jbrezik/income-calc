@@ -1,25 +1,32 @@
 import { describe, expect, it } from "vitest";
-import { SAMPLE_HOUSEHOLD } from "../config/defaults";
-import { monthlyNeed } from "./need";
+import { categoryTotal, monthlyNeed, type Household } from "./need";
 
-const total = SAMPLE_HOUSEHOLD.expenses.reduce((s, e) => s + e.amount, 0);
+const item = (id: string, amount: number, enabled = true) => ({ id, name: id, amount, enabled });
+
+const h: Household = {
+  categories: [
+    { id: "c1", name: "Bydlení", enabled: true, items: [item("a", 20000), item("b", 5000)] },
+    { id: "c2", name: "Auto", enabled: true, items: [item("c", 3000), item("d", 1000, false)] },
+  ],
+  incomes: [item("partner", 20000), item("rent", 4000, false)],
+  savings: 5000,
+};
 
 describe("monthlyNeed", () => {
-  it("expenses + groceries + savings - partner net", () => {
-    const { groceries, savings, partnerNet } = SAMPLE_HOUSEHOLD;
-    expect(monthlyNeed(SAMPLE_HOUSEHOLD)).toBe(total + groceries + savings - partnerNet);
+  it("enabled items + savings - enabled incomes", () => {
+    expect(monthlyNeed(h)).toBe(25000 + 3000 + 5000 - 20000);
   });
 
-  it("skips disabled expenses", () => {
-    const [first] = SAMPLE_HOUSEHOLD.expenses;
-    const h = {
-      ...SAMPLE_HOUSEHOLD,
-      expenses: SAMPLE_HOUSEHOLD.expenses.map((e) => (e.id === first.id ? { ...e, enabled: false } : e)),
-    };
-    expect(monthlyNeed(h)).toBe(monthlyNeed(SAMPLE_HOUSEHOLD) - first.amount);
+  it("disabled category drops all its items", () => {
+    const off = { ...h, categories: h.categories.map((c) => (c.id === "c2" ? { ...c, enabled: false } : c)) };
+    expect(monthlyNeed(off)).toBe(25000 + 5000 - 20000);
+  });
+
+  it("category total counts enabled items regardless of category switch", () => {
+    expect(categoryTotal(h.categories[1])).toBe(3000);
   });
 
   it("never goes below zero", () => {
-    expect(monthlyNeed({ expenses: [], groceries: 0, savings: 0, partnerNet: 50000 })).toBe(0);
+    expect(monthlyNeed({ categories: [], incomes: [item("x", 50000)], savings: 0 })).toBe(0);
   });
 });
