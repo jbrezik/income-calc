@@ -12,6 +12,11 @@
 
 body { background: var(--bs-tertiary-bg); }
 
+/* Phones: scale everything down two steps (16px -> 14px); Bootstrap and our sizes are rem-based. */
+@media (max-width: 575.98px) {
+  html { font-size: 14px; }
+}
+
 .font-monospace-num, .num-input, .table { font-variant-numeric: tabular-nums; }
 
 /* Collapsible panels */
