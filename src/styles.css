@@ -25,13 +25,19 @@ body { background: var(--bs-tertiary-bg); }
 .num-input { padding-right: 0.5rem; }
 .num-input::-webkit-inner-spin-button { margin-left: 0.75rem; }
 
-/* Stepper: short value field between +/- buttons, taller in mode cards */
-.stepper .num-input { flex: 0 1 9rem; min-width: 6rem; }
-.stepper.input-group-lg .stepper-btn { min-width: 3.5rem; font-size: 1rem; }
-.stepper .stepper-btn { font-variant-numeric: tabular-nums; }
+/* Stepper: centered, never wraps, short value field between red minus and green plus buttons */
+.stepper { width: fit-content; max-width: 100%; margin-inline: auto; }
+.stepper .num-input { flex: 0 0 6.5rem; width: 6.5rem; min-width: 0; }
+.stepper .stepper-btn { padding-inline: 0.5rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* Sliders: light blue track for visibility */
+.form-range::-webkit-slider-runnable-track { background-color: var(--bs-primary-bg-subtle); box-shadow: inset 0 0 0 1px var(--bs-primary-border-subtle); }
+.form-range::-moz-range-track { background-color: var(--bs-primary-bg-subtle); box-shadow: inset 0 0 0 1px var(--bs-primary-border-subtle); }
 
 /* Category cards */
 .category-card .card-header { padding: 0.5rem 0.75rem; }
+.category-name { text-transform: uppercase; font-size: 1.1rem; letter-spacing: 0.04em; }
+.list-group-dashed > .list-group-item { border-style: dashed; }
 .item-row { padding: 0.35rem 0.75rem; }
 .item-name { min-width: 0; flex: 1 1 auto; }
 .item-amount { flex: 0 0 8.5rem; }

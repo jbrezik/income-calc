@@ -18,7 +18,7 @@ type ItemListProps = {
 function ItemList({ items, onChange, addLabel, muted }: ItemListProps) {
   const set = (id: string, patch: Partial<Item>) => onChange(items.map((i) => (i.id === id ? { ...i, ...patch } : i)));
   return (
-    <ul className={`list-group list-group-flush${muted ? " opacity-50" : ""}`}>
+    <ul className={`list-group list-group-flush list-group-dashed${muted ? " opacity-50" : ""}`}>
       {items.map((i) => (
         <li key={i.id} className={`list-group-item d-flex align-items-center gap-2 item-row${i.enabled ? "" : " item-off"}`}>
           <Switch label={`Zahrnout ${i.name}`} hideLabel checked={i.enabled} onChange={(enabled) => set(i.id, { enabled })} />
@@ -52,7 +52,7 @@ function CategoryCard({ category: c, onChange, onRemove }: CategoryCardProps) {
     <div className="card h-100 category-card">
       <div className="card-header d-flex align-items-center gap-2 bg-body-tertiary">
         <Switch label={`Kategorie ${c.name}`} hideLabel checked={c.enabled} onChange={(enabled) => onChange({ ...c, enabled })} />
-        <input className="form-control form-control-sm border-0 bg-transparent fw-semibold px-1" aria-label="Název kategorie"
+        <input className="form-control border-0 bg-transparent fw-semibold px-1 category-name" aria-label="Název kategorie"
           value={c.name} onChange={(e) => onChange({ ...c, name: e.target.value })} />
         <span className={`text-nowrap fw-semibold ${c.enabled ? "" : "text-body-secondary text-decoration-line-through"}`}>
           {kc(categoryTotal(c))}

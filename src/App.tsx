@@ -51,19 +51,24 @@ export function App() {
 
         <Panel title="Daňové slevy a odpočty" icon="bi-percent" open={s.openPanels.tax} onToggle={setPanel("tax")}
           summary={`${childrenLabel(person.children)}, úroky z hypotéky ${kc(s.mortgageInterest)}/rok`}>
+          <h3 className="h6 text-uppercase text-body-secondary mb-2"><i className="bi bi-people me-1" aria-hidden />Děti</h3>
           <div className="row g-3 align-items-end">
-            <div className="col-sm-6 col-lg-3 pb-2">
-              <Switch label="Uplatňuji slevu na děti" checked={s.claimChildren} onChange={(claimChildren) => set({ claimChildren })} />
-            </div>
-            <div className="col-sm-6 col-lg-2">
+            <div className="col-sm-6 col-lg-3">
               <NumField label="Počet dětí" value={s.children} suffix="" min={0} max={10}
                 onChange={(children) => set({ children: Math.max(0, Math.round(children)) })} />
             </div>
+            <div className="col-sm-6 col-lg-4 pb-3">
+              <Switch label="Uplatňuji slevu na děti" checked={s.claimChildren} onChange={(claimChildren) => set({ claimChildren })} />
+            </div>
+          </div>
+          <hr className="my-3" />
+          <h3 className="h6 text-uppercase text-body-secondary mb-2"><i className="bi bi-bank me-1" aria-hidden />Hypotéka</h3>
+          <div className="row g-3 align-items-end">
             <div className="col-sm-6 col-lg-3">
               <NumField label="Úroky z hypotéky za rok" value={s.mortgageInterest} step={1000}
                 onChange={(mortgageInterest) => set({ mortgageInterest })} />
             </div>
-            <div className="col-sm-6 col-lg-4 pb-2">
+            <div className="col-sm-6 col-lg-5 pb-3">
               <Switch label="Bydlení pořízeno před 2021 (strop 300 000 Kč)" checked={s.homeBefore2021}
                 onChange={(homeBefore2021) => set({ homeBefore2021 })} />
             </div>

@@ -62,7 +62,7 @@ export function HppCard({ need, year, person, offer, onOffer, mdPerYear, osvcOpt
       <div className="card-body">
         <Minimum value={kc(minGross)} unit="hrubého / měs"
           detail={`čistá ${kc(min.netMonthly)} · ${kc(min.hourly)}/h · firmu stojí ${kc(min.employerCostMonthly)}`} />
-        <Stepper label="Nabídka (hrubá mzda / měs)" value={offer} steps={[500, 1000]} max={Math.max(250000, offer)} slider large
+        <Stepper label="Nabídka (hrubá mzda / měs)" value={offer} steps={[500, 1000]} max={Math.max(250000, offer)} slider
           onChange={onOffer} />
         <Surplus value={r.netMonthly - need} />
         <table className="table table-sm">
@@ -116,7 +116,7 @@ export function OsvcCard({ need, year, person, offer, onOffer, mdPerYear, onMdPe
       </div>
       <div className="card-body">
         <Minimum value={kc(minRate)} unit="/ MD" detail={`${kc(min.hourly)}/h · čistá ${kc(min.netMonthly)} / měs`} />
-        <Stepper label="Nabídka (sazba za MD)" value={offer} steps={[100, 500]} max={Math.max(20000, offer)} slider large
+        <Stepper label="Nabídka (sazba za MD)" value={offer} steps={[100, 500]} max={Math.max(20000, offer)} slider
           onChange={onOffer} />
         <div className="row g-2 align-items-end mb-2">
           <div className="col-sm-6">

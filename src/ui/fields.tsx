@@ -33,29 +33,28 @@ type StepperProps = NumFieldProps & {
   steps: [number, number];
   /** Show a range slider under the input. */
   slider?: boolean;
-  large?: boolean;
 };
 
 const fmtStep = (n: number) => (n >= 1000 ? `${n / 1000}k` : String(n));
 
-/** <-big><-small>[value]<+small><+big> with optional slider. */
-export function Stepper({ label, value, onChange, steps, min = 0, max, slider, large, suffix = "Kč" }: StepperProps) {
+/** Centered <-big><-small>[value]<+small><+big> that never wraps, with optional slider. */
+export function Stepper({ label, value, onChange, steps, min = 0, max, slider, suffix = "Kč" }: StepperProps) {
   const id = useId();
   const clamp = (n: number) => Math.max(min, max !== undefined && !slider ? Math.min(max, n) : n);
   const btn = (delta: number) => (
-    <button type="button" className="btn btn-outline-secondary stepper-btn" onClick={() => onChange(clamp(value + delta))}
-      aria-label={`${delta > 0 ? "Přidat" : "Ubrat"} ${Math.abs(delta)} ${suffix}`}>
+    <button type="button" className={`btn stepper-btn ${delta > 0 ? "btn-outline-success" : "btn-outline-danger"}`}
+      onClick={() => onChange(clamp(value + delta))} aria-label={`${delta > 0 ? "Přidat" : "Ubrat"} ${Math.abs(delta)} ${suffix}`}>
       {delta > 0 ? "+" : "−"}{fmtStep(Math.abs(delta))}
     </button>
   );
   const [small, big] = steps;
   return (
     <div className="mb-3">
-      <label htmlFor={id} className="form-label small text-body-secondary mb-1">{label}</label>
-      <div className={`input-group stepper${large ? " input-group-lg" : ""}`}>
+      <label htmlFor={id} className="form-label small text-body-secondary mb-1 d-block text-center">{label}</label>
+      <div className="input-group flex-nowrap stepper">
         {btn(-big)}
         {btn(-small)}
-        <input id={id} className="form-control text-end num-input" type="number" inputMode="numeric"
+        <input id={id} className="form-control text-center num-input" type="number" inputMode="numeric"
           value={value} min={min} step={small}
           onChange={(e) => { const n = parse(e.target.value); if (Number.isFinite(n)) onChange(clamp(n)); }} />
         <span className="input-group-text">{suffix}</span>
