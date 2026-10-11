@@ -1,10 +1,46 @@
+import { useState, type DragEvent } from "react";
 import type { Category, Household, Item } from "../engine/need";
-import { categoryTotal, expensesTotal, incomesTotal, monthlyNeed } from "../engine/need";
+import { categoryTotal, expensesTotal, incomesTotal, monthlyNeed, moveItem } from "../engine/need";
 import { Stepper, Switch } from "./fields";
 import { kc } from "./format";
 import { Panel } from "./Panel";
 
 const newId = (prefix: string) => `${prefix}${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+
+/** Drop position: before item `before` in category `cat`; null = end of the category. */
+type DropTarget = { cat: string; before: string | null };
+
+/** Drag-and-drop wiring shared by all category lists. Rows drag only from their grip handle. */
+type Dnd = {
+  categoryId: string;
+  armed: string | null;
+  dragging: string | null;
+  over: DropTarget | null;
+  arm: (id: string | null) => void;
+  start: (id: string) => void;
+  hover: (t: DropTarget) => void;
+  drop: (t: DropTarget) => void;
+  end: () => void;
+};
+
+/** Handlers that make an element a drop target. Stops propagation so the card-level target doesn't override rows. */
+function dropZone(dnd: Dnd | undefined, before: string | null) {
+  if (!dnd) return {};
+  const target = { cat: dnd.categoryId, before };
+  return {
+    onDragOver: (e: DragEvent) => {
+      if (!dnd.dragging) return;
+      e.preventDefault();
+      e.stopPropagation();
+      if (dnd.over?.cat !== target.cat || dnd.over.before !== before) dnd.hover(target);
+    },
+    onDrop: (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dnd.drop(target);
+    },
+  };
+}
 
 type ItemListProps = {
   items: Item[];
@@ -12,15 +48,32 @@ type ItemListProps = {
   addLabel: string;
   /** Category is switched off: render items dimmed. */
   muted?: boolean;
+  dnd?: Dnd;
 };
 
 /** Rows of name + amount with per-row switch and remove, plus an add link. */
-function ItemList({ items, onChange, addLabel, muted }: ItemListProps) {
+function ItemList({ items, onChange, addLabel, muted, dnd }: ItemListProps) {
   const set = (id: string, patch: Partial<Item>) => onChange(items.map((i) => (i.id === id ? { ...i, ...patch } : i)));
+  const isOver = (before: string | null) => dnd?.over?.cat === dnd?.categoryId && dnd?.over?.before === before;
   return (
     <ul className={`list-group list-group-flush list-group-dashed${muted ? " opacity-50" : ""}`}>
       {items.map((i) => (
-        <li key={i.id} className={`list-group-item d-flex align-items-center gap-2 item-row${i.enabled ? "" : " item-off"}`}>
+        <li key={i.id} {...dropZone(dnd, i.id)}
+          draggable={dnd?.armed === i.id}
+          onDragStart={(e) => {
+            e.dataTransfer.effectAllowed = "move";
+            e.dataTransfer.setData("text/plain", i.id);
+            dnd?.start(i.id);
+          }}
+          onDragEnd={() => dnd?.end()}
+          className={`list-group-item d-flex align-items-center gap-2 item-row${i.enabled ? "" : " item-off"}${
+            isOver(i.id) ? " drop-before" : ""}${dnd?.dragging === i.id ? " dragging" : ""}`}>
+          {dnd && (
+            <span className="drag-handle" title="Přetáhnout do jiné kategorie" aria-hidden
+              onPointerDown={() => dnd.arm(i.id)} onPointerUp={() => dnd.arm(null)}>
+              <i className="bi bi-grip-vertical" />
+            </span>
+          )}
           <Switch label={`Zahrnout ${i.name}`} hideLabel checked={i.enabled} onChange={(enabled) => set(i.id, { enabled })} />
           <input className="form-control form-control-sm border-0 bg-transparent px-1 item-name" aria-label="Název"
             value={i.name} onChange={(e) => set(i.id, { name: e.target.value })} />
@@ -35,7 +88,7 @@ function ItemList({ items, onChange, addLabel, muted }: ItemListProps) {
           </button>
         </li>
       ))}
-      <li className="list-group-item">
+      <li className={`list-group-item${isOver(null) ? " drop-before" : ""}`} {...dropZone(dnd, null)}>
         <button type="button" className="btn btn-link btn-sm p-0 text-decoration-none"
           onClick={() => onChange([...items, { id: newId("i"), name: "", amount: 0, enabled: true }])}>
           <i className="bi bi-plus-lg me-1" aria-hidden />{addLabel}
@@ -45,11 +98,12 @@ function ItemList({ items, onChange, addLabel, muted }: ItemListProps) {
   );
 }
 
-type CategoryCardProps = { category: Category; onChange: (c: Category) => void; onRemove: () => void };
+type CategoryCardProps = { category: Category; onChange: (c: Category) => void; onRemove: () => void; dnd: Dnd };
 
-function CategoryCard({ category: c, onChange, onRemove }: CategoryCardProps) {
+function CategoryCard({ category: c, onChange, onRemove, dnd }: CategoryCardProps) {
+  const over = dnd.dragging && dnd.over?.cat === c.id;
   return (
-    <div className="card h-100 category-card">
+    <div className={`card h-100 category-card${over ? " drop-into" : ""}`} {...dropZone(dnd, null)}>
       <div className="card-header d-flex align-items-center gap-2 bg-body-tertiary">
         <Switch label={`Kategorie ${c.name}`} hideLabel checked={c.enabled} onChange={(enabled) => onChange({ ...c, enabled })} />
         <input className="form-control border-0 bg-transparent fw-semibold px-1 category-name" aria-label="Název kategorie"
@@ -62,7 +116,7 @@ function CategoryCard({ category: c, onChange, onRemove }: CategoryCardProps) {
           <i className="bi bi-x-lg" aria-hidden />
         </button>
       </div>
-      <ItemList items={c.items} onChange={(items) => onChange({ ...c, items })} addLabel="Přidat položku" muted={!c.enabled} />
+      <ItemList items={c.items} onChange={(items) => onChange({ ...c, items })} addLabel="Přidat položku" muted={!c.enabled} dnd={dnd} />
     </div>
   );
 }
@@ -82,6 +136,26 @@ export function HouseholdPanel({ household: h, onChange, open, onToggle }: Props
   const need = monthlyNeed(h);
   const summary = <>Potřebuji čistého <strong>{kc(need)}</strong> měsíčně</>;
 
+  const [armed, setArmed] = useState<string | null>(null);
+  const [dragging, setDragging] = useState<string | null>(null);
+  const [over, setOver] = useState<DropTarget | null>(null);
+  const endDrag = () => {
+    setArmed(null);
+    setDragging(null);
+    setOver(null);
+  };
+  const dndFor = (categoryId: string): Dnd => ({
+    categoryId, armed, dragging, over,
+    arm: setArmed,
+    start: setDragging,
+    hover: setOver,
+    drop: (t) => {
+      if (dragging) onChange({ ...h, categories: moveItem(h.categories, dragging, t.cat, t.before) });
+      endDrag();
+    },
+    end: endDrag,
+  });
+
   return (
     <Panel title="Rozpočet domácnosti" icon="bi-house" summary={summary} open={open} onToggle={onToggle}>
       <div className="d-flex align-items-baseline justify-content-between mb-2">
@@ -93,7 +167,7 @@ export function HouseholdPanel({ household: h, onChange, open, onToggle }: Props
       <div className="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3">
         {h.categories.map((c) => (
           <div className="col" key={c.id}>
-            <CategoryCard category={c} onChange={setCategory} onRemove={() => removeCategory(c.id)} />
+            <CategoryCard category={c} onChange={setCategory} onRemove={() => removeCategory(c.id)} dnd={dndFor(c.id)} />
           </div>
         ))}
       </div>

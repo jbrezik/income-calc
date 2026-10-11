@@ -24,3 +24,18 @@ export const incomesTotal = (h: Household) => enabledSum(h.incomes);
 export function monthlyNeed(h: Household): number {
   return Math.max(0, expensesTotal(h) + h.savings - incomesTotal(h));
 }
+
+/** Move an item to category `toCategory`, before item `beforeId` (null = append). Works within one category too. */
+export function moveItem(categories: Category[], itemId: string, toCategory: string, beforeId: string | null): Category[] {
+  const item = categories.flatMap((c) => c.items).find((i) => i.id === itemId);
+  if (!item || itemId === beforeId) return categories;
+  return categories
+    .map((c) => ({ ...c, items: c.items.filter((i) => i.id !== itemId) }))
+    .map((c) => {
+      if (c.id !== toCategory) return c;
+      const at = beforeId ? c.items.findIndex((i) => i.id === beforeId) : -1;
+      const items = [...c.items];
+      items.splice(at < 0 ? items.length : at, 0, item);
+      return { ...c, items };
+    });
+}

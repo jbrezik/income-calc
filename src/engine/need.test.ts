@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { categoryTotal, monthlyNeed, type Household } from "./need";
+import { categoryTotal, monthlyNeed, moveItem, type Household } from "./need";
 
 const item = (id: string, amount: number, enabled = true) => ({ id, name: id, amount, enabled });
 
@@ -28,5 +28,31 @@ describe("monthlyNeed", () => {
 
   it("never goes below zero", () => {
     expect(monthlyNeed({ categories: [], incomes: [item("x", 50000)], savings: 0 })).toBe(0);
+  });
+});
+
+describe("moveItem", () => {
+  const ids = (cs: Household["categories"]) => cs.map((c) => c.items.map((i) => i.id));
+
+  it("moves to another category before a given item", () => {
+    expect(ids(moveItem(h.categories, "a", "c2", "d"))).toEqual([["b"], ["c", "a", "d"]]);
+  });
+
+  it("appends when no target item", () => {
+    expect(ids(moveItem(h.categories, "b", "c2", null))).toEqual([["a"], ["c", "d", "b"]]);
+  });
+
+  it("reorders within a category", () => {
+    expect(ids(moveItem(h.categories, "b", "c1", "a"))).toEqual([["b", "a"], ["c", "d"]]);
+  });
+
+  it("keeps the item's own fields", () => {
+    const moved = moveItem(h.categories, "d", "c1", null)[0].items.at(-1);
+    expect(moved).toEqual(h.categories[1].items[1]);
+  });
+
+  it("no-op for unknown item or drop onto itself", () => {
+    expect(ids(moveItem(h.categories, "zzz", "c2", null))).toEqual([["a", "b"], ["c", "d"]]);
+    expect(ids(moveItem(h.categories, "a", "c1", "a"))).toEqual([["a", "b"], ["c", "d"]]);
   });
 });
