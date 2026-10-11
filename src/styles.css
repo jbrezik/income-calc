@@ -60,3 +60,5 @@ body { background: var(--bs-tertiary-bg); }
 .stats-table .cell-input::-webkit-inner-spin-button { display: none; }
 
 .chart { cursor: pointer; }
+.targets { font-size: 0.78rem; }
+.targets .target-pick { font-size: 0.78rem; line-height: 1; }
