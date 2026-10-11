@@ -89,7 +89,7 @@ export function HppCard({ need, year, person, offer, onOffer, mdPerYear, osvcOpt
         <span className="text-body-secondary">zaměstnanec</span>
       </div>
       <div className="card-body">
-        <Minimum value={kc(minGross)} unit=""
+        <Minimum value={kc(minGross)} unit="hrubého / měs"
           detail={`čistá ${kc(min.netMonthly)} · ${kc(min.hourly)}/h · firmu stojí ${kc(min.employerCostMonthly)}`} />
         <Stepper label="Nabídka (hrubá mzda / měs)" value={offer} steps={[500, 1000]} max={Math.max(250000, offer)} slider
           onChange={onOffer} />
