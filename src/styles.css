@@ -17,6 +17,9 @@ body { background: var(--bs-tertiary-bg); }
   html { font-size: 13px; }
   /* Steppers stay two steps above the base so they are easy to tap. */
   .stepper .btn, .stepper .form-control, .stepper .input-group-text { font-size: 15px; }
+  /* Target hints under the charts wrap instead of being cut off with an ellipsis. */
+  .targets li { flex-wrap: wrap !important; white-space: normal !important; }
+  .targets .text-truncate { overflow: visible; text-overflow: clip; white-space: normal; }
 }
 
 .font-monospace-num, .num-input, .table { font-variant-numeric: tabular-nums; }
