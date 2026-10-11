@@ -12,9 +12,9 @@
 
 body { background: var(--bs-tertiary-bg); }
 
-/* Phones: scale everything down two steps (16px -> 14px); Bootstrap and our sizes are rem-based. */
+/* Phones: scale everything down (16px -> 13px); Bootstrap and our sizes are rem-based. */
 @media (max-width: 575.98px) {
-  html { font-size: 14px; }
+  html { font-size: 13px; }
 }
 
 .font-monospace-num, .num-input, .table { font-variant-numeric: tabular-nums; }
