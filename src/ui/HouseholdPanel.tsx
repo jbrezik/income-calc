@@ -182,7 +182,7 @@ export function HouseholdPanel({ household: h, onChange, open, onToggle }: Props
           </div>
         </div>
         <div className="col-md-6 col-xl-4">
-          <h3 className="h6 text-uppercase text-body-secondary mb-2">Spoření</h3>
+          <h3 className="h6 text-uppercase text-body-secondary mb-2"><i className="bi bi-piggy-bank me-1" aria-hidden />Spoření</h3>
           <Stepper label="Měsíčně odložit" value={h.savings} steps={[500, 1000]} max={60000} slider
             onChange={(savings) => onChange({ ...h, savings })} />
         </div>

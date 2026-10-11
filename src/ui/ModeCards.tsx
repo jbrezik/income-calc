@@ -7,11 +7,12 @@ import { SurplusChart } from "./SurplusChart";
 
 type Common = { need: number; year: TaxYear; person: Person };
 
-function Row({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
+function Row({ label, value, strong, good }: { label: string; value: string; strong?: boolean; good?: boolean }) {
+  const tone = good ? "text-success" : "";
   return (
     <tr className={strong ? "fw-bold" : ""}>
-      <td>{label}</td>
-      <td className="text-end text-nowrap">{value}</td>
+      <td className={tone}>{label}</td>
+      <td className={`text-end text-nowrap ${tone}`}>{value}</td>
     </tr>
   );
 }
@@ -99,7 +100,7 @@ export function HppCard({ need, year, person, offer, onOffer, mdPerYear, osvcOpt
             <Row label="Sociální (7,1 %)" value={`−${kc(r.annual.social / 12)}`} />
             <Row label="Zdravotní (4,5 %)" value={`−${kc(r.annual.health / 12)}`} />
             <TaxRow annualTax={r.annual.tax} />
-            <Row label="Čistá mzda" value={kc(r.netMonthly)} strong />
+            <Row label="Čistá mzda" value={kc(r.netMonthly)} strong good />
             <Row label="Hodinová sazba" value={`${kc(r.hourly)}/h`} />
             <Row label="Náklad zaměstnavatele" value={kc(r.employerCostMonthly)} />
           </tbody>
@@ -164,7 +165,7 @@ export function OsvcCard({ need, year, person, offer, onOffer, mdPerYear, onMdPe
             <Row label="Zdravotní" value={`−${kc(r.annual.health / 12)}`} />
             {opts.sickness && <Row label="Nemocenské" value={`−${kc(r.annual.sickness / 12)}`} />}
             <TaxRow annualTax={r.annual.tax} />
-            <Row label="Čistý příjem" value={kc(r.netMonthly)} strong />
+            <Row label="Čistý příjem" value={kc(r.netMonthly)} strong good />
             <Row label="Hodinová sazba" value={`${kc(r.hourly)}/h`} />
             <Row label="Obrat za rok" value={kc(r.annual.revenue)} />
           </tbody>
